@@ -1,5 +1,5 @@
 import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { connect } from 'extendable-media-recorder-wav-encoder';
 
 export type ReactMediaRecorderRenderProps = {
@@ -280,6 +280,18 @@ export function useReactMediaRecorder({
     }
   };
 
+  const previewStream = useMemo(() => {
+    return mediaStream.current ?
+        new MediaStream(mediaStream.current.getVideoTracks()) :
+        null
+  }, [mediaStream.current])
+
+  const previewAudioStream = useMemo(() => {
+    return mediaStream.current ?
+        new MediaStream(mediaStream.current.getAudioTracks()) :
+        null
+  }, [mediaStream.current])
+
   return {
     error: RecorderErrors[error],
     muteAudio: () => muteAudio(true),
@@ -291,12 +303,8 @@ export function useReactMediaRecorder({
     mediaBlobUrl,
     status,
     isAudioMuted,
-    previewStream: mediaStream.current ?
-      new MediaStream(mediaStream.current.getVideoTracks()) :
-      null,
-    previewAudioStream: mediaStream.current ?
-      new MediaStream(mediaStream.current.getAudioTracks()) :
-      null,
+    previewStream,
+    previewAudioStream,
     clearBlobUrl: () => {
       if (mediaBlobUrl) {
         URL.revokeObjectURL(mediaBlobUrl);
